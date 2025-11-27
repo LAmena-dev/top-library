@@ -13,10 +13,31 @@
 
     <header>
         <h1>Library</h1>
-        <button class="addBook">Add Book</button>
+        <button class="openModal">Add Book</button>
     </header>
     <main class="library">
     </main>
+
+    <dialog class="bookForm">
+        <button class="closeModal">X</button>
+        <h1>Enter book details:</h1>
+        <form>
+            <label for="title">* Title:</label>
+            <input type="text" id="title" name="book_title" placeholder="Book title..." required>
+
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="book_author" placeholder="Book author...">
+
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" name="book_genre" placeholder="Book genre...">
+
+            <label for="pages">No. of Pages:</label>
+            <input type="number" min="1" id="pages" name="book_pages" placeholder="Number of pages...">
+
+            <label for="read">Read?:<input type="checkbox" id="read" name="book_read"></label>
+            <button type="button" class="addBook">Submit</button>
+        </form>
+    </dialog>
 
 </body>
 
