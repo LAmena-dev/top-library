@@ -1,32 +1,4 @@
 // script for library project
-
-const dummy1 = {
-  bookID: crypto.randomUUID(),
-  title: "Book 1",
-  author: "Author 1",
-  genre: "romance",
-  pages: "20",
-  read: true,
-};
-const dummy2 = {
-  bookID: crypto.randomUUID(),
-  title: "Book 2",
-  author: "Author 2",
-  genre: "scifi",
-  pages: "203",
-  read: true,
-};
-const dummy3 = {
-  bookID: crypto.randomUUID(),
-  title: "Book 3",
-  author: "Author 3",
-  genre: "mystery",
-  pages: "530",
-  read: false,
-};
-
-const myLibrary = [dummy1, dummy2, dummy3];
-
 const bookForm = document.querySelector(".bookForm");
 const openModal = document.querySelector(".openModal");
 openModal.addEventListener("click", () => {
@@ -52,67 +24,68 @@ function Book(bookID, title, author, genre, pages, read) {
   this.read = read;
 }
 
+Book.prototype.toggleRead = function () {
+  this.read = !this.read;
+};
+
 function addBookToLibrary(title, author, genre, pages, read) {
   const id = crypto.randomUUID();
   myLibrary.push(new Book(id, title, author, genre, pages, read));
 }
 
+function elementHelper(tag, cls, text) {
+  const el = document.createElement(tag);
+  if (cls) el.classList.add(cls);
+  if (typeof text === "boolean") {
+    el.textContent = text ? "read" : "not read";
+  } else if (text != null) {
+    el.textContent = text;
+  }
+
+  return el;
+}
+
 let bookLoader = (book) => {
-  const card = document.createElement("article");
-  card.classList.add("card");
+  const card = elementHelper("article", "card");
+  card.dataset.bookID = book.bookID;
 
-  const headDiv = document.createElement("div");
-  headDiv.classList.add("headDiv");
-  const cardTitle = document.createElement("h2");
-  const cardAuthor = document.createElement("h3");
+  const cardTitle = elementHelper("h2", "cardTitle", book.title);
 
-  const breaker = document.createElement("hr");
-  const cardGenre = document.createElement("p");
-  const cardpages = document.createElement("p");
-  const breaker2 = document.createElement("hr");
+  const contentDiv = elementHelper("div", "contentDiv");
+  const cardAuthor = elementHelper("h3", null, `Author: ${book.author || ""}`);
+  const cardGenre = elementHelper("p", null, `Genre: ${book.genre || ""}`);
+  const cardPages = elementHelper(
+    "p",
+    null,
+    `No. of Pages: ${book.pages || ""}`
+  );
 
-  const footDiv = document.createElement("div");
-  footDiv.classList.add("footDiv");
+  const footDiv = elementHelper("div", "footDiv");
+  const readBtn = elementHelper("button", "readStatus", book.read);
+  readBtn.addEventListener("click", () => {
+    book.toggleRead();
+    readBtn.textContent = book.read ? "read" : "not read";
+  });
 
-  const readSection = document.createElement("div")
-  readSection.textContent = "Read?: "
-  const readBtn = document.createElement("button");
-  readBtn.classList.add("readStatus");
-
-  const removeBook = document.createElement("button");
-  removeBook.classList.add("removeBook");
-  removeBook.textContent = "Remove";
-  card.setAttribute("data-bookID", book.bookID);
-
+  const removeBook = elementHelper("button", "removeBook", "Remove");
   removeBook.addEventListener("click", () => {
-    const chosenBook = document.querySelector(`[data-bookID="${book.bookID}"]`);
-
-    chosenBook.remove();
+    card.remove();
     const index = myLibrary.findIndex(
       (booktoRemove) => booktoRemove.bookID === book.bookID
     );
     if (index !== -1) myLibrary.splice(index, 1);
   });
 
-  cardTitle.textContent = `Title: ${book.title}`;
-  cardAuthor.textContent = `Author: ${book.author || ""}`;
-  cardGenre.textContent = `Genre: ${book.genre || ""}`;
-  cardpages.textContent = `No. of Pages: ${book.pages || ""}`;
-  readBtn.textContent = book.read;
+  contentDiv.append(cardAuthor, cardGenre, cardPages)
+  footDiv.append(readBtn, removeBook);
 
-  headDiv.appendChild(cardTitle);
-  headDiv.appendChild(cardAuthor);
-  card.appendChild(headDiv);
-
-  card.appendChild(breaker);
-  card.appendChild(cardGenre);
-  card.appendChild(cardpages);
-  card.appendChild(breaker2);
-
-  readSection.appendChild(readBtn)
-  footDiv.appendChild(readSection);
-  footDiv.appendChild(removeBook);
-  card.appendChild(footDiv);
+  card.append(
+    cardTitle,
+    document.createElement("hr"),
+    contentDiv,
+    document.createElement("hr"),
+    footDiv
+  );
 
   library.appendChild(card);
 };
@@ -139,5 +112,36 @@ addBook.addEventListener("click", (e) => {
   bookLoader(newBook);
   bookForm.close();
 });
+
+const dummy1 = new Book(
+  crypto.randomUUID(),
+  "Deltora Quest",
+  "Emily Rodda",
+  "fantasy",
+  "203",
+  true
+);
+const dummy2 = new Book(
+  crypto.randomUUID(),
+  "Love in the Reaches of Space",
+  "Hal Barry",
+  "romance scifi",
+  "403",
+  true
+);
+const dummy3 = new Book(
+  crypto.randomUUID(),
+  "London Cases",
+  "W.S. Lockson",
+  "mystery",
+  "530",
+  false
+);
+
+const myLibrary = [
+  dummy1,
+  dummy2,
+  dummy3,
+];
 
 libraryLoader();
