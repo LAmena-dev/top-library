@@ -12,16 +12,15 @@ closeModal.addEventListener("click", () => {
 
 const library = document.querySelector(".library");
 
-function Book(bookID, title, author, genre, pages, read) {
-  if (!new.target) {
-    throw Error("You must use the 'new' operator to call the constructor");
+class Book {
+  constructor(bookID, title, author, genre, pages, read) {
+    this.bookID = bookID;
+    this.title = title;
+    this.author = author;
+    this.genre = genre;
+    this.pages = pages;
+    this.read = read;
   }
-  this.bookID = bookID;
-  this.title = title;
-  this.author = author;
-  this.genre = genre;
-  this.pages = pages;
-  this.read = read;
 }
 
 Book.prototype.toggleRead = function () {
@@ -45,60 +44,64 @@ function elementHelper(tag, cls, text) {
   return el;
 }
 
-let bookLoader = (book) => {
-  const card = elementHelper("article", "card");
-  card.dataset.bookID = book.bookID;
+const Library = (() => {
+  function bookLoader(book) {
+    const card = elementHelper("article", "card");
+    card.dataset.bookID = book.bookID;
 
-  const cardTitle = elementHelper("h2", "cardTitle", book.title);
+    const cardTitle = elementHelper("h2", "cardTitle", book.title);
 
-  const contentDiv = elementHelper("div", "contentDiv");
-  const cardAuthor = elementHelper("h3", null, `Author: ${book.author || ""}`);
-  const cardGenre = elementHelper("p", null, `Genre: ${book.genre || ""}`);
-  const cardPages = elementHelper(
-    "p",
-    null,
-    `No. of Pages: ${book.pages || ""}`
-  );
-
-  const footDiv = elementHelper("div", "footDiv");
-  const readBtn = elementHelper("button", "readStatus", book.read);
-  readBtn.addEventListener("click", () => {
-    book.toggleRead();
-    readBtn.textContent = book.read ? "read" : "not read";
-  });
-
-  const removeBook = elementHelper("button", "removeBook", "Remove");
-  removeBook.addEventListener("click", () => {
-    card.remove();
-    const index = myLibrary.findIndex(
-      (booktoRemove) => booktoRemove.bookID === book.bookID
+    const contentDiv = elementHelper("div", "contentDiv");
+    const cardAuthor = elementHelper(
+      "h3",
+      null,
+      `Author: ${book.author || ""}`
     );
-    if (index !== -1) myLibrary.splice(index, 1);
-  });
+    const cardGenre = elementHelper("p", null, `Genre: ${book.genre || ""}`);
+    const cardPages = elementHelper(
+      "p",
+      null,
+      `No. of Pages: ${book.pages || ""}`
+    );
 
-  contentDiv.append(cardAuthor, cardGenre, cardPages)
-  footDiv.append(readBtn, removeBook);
+    const footDiv = elementHelper("div", "footDiv");
+    const readBtn = elementHelper("button", "readStatus", book.read);
+    readBtn.addEventListener("click", () => {
+      book.toggleRead();
+      readBtn.textContent = book.read ? "read" : "not read";
+    });
 
-  card.append(
-    cardTitle,
-    document.createElement("hr"),
-    contentDiv,
-    document.createElement("hr"),
-    footDiv
-  );
+    const removeBook = elementHelper("button", "removeBook", "Remove");
+    removeBook.addEventListener("click", () => {
+      card.remove();
+      const index = myLibrary.findIndex(
+        (booktoRemove) => booktoRemove.bookID === book.bookID
+      );
+      if (index !== -1) myLibrary.splice(index, 1);
+    });
 
-  library.appendChild(card);
-};
+    contentDiv.append(cardAuthor, cardGenre, cardPages);
+    footDiv.append(readBtn, removeBook);
 
-let libraryLoader = () => {
-  myLibrary.forEach((entry) => {
-    bookLoader(entry);
-  });
-};
+    card.append(
+      cardTitle,
+      document.createElement("hr"),
+      contentDiv,
+      document.createElement("hr"),
+      footDiv
+    );
 
-const addBook = document.querySelector(".addBook");
+    library.appendChild(card);
+  }
 
-addBook.addEventListener("click", (e) => {
+  function libraryLoader() {
+    myLibrary.forEach(bookLoader);
+  }
+
+  return { bookLoader, libraryLoader };
+})();
+
+document.querySelector(".addBook").addEventListener("click", (e) => {
   e.preventDefault();
   const bookTitle = document.querySelector("#title").value;
   const bookAuthor = document.querySelector("#author").value;
@@ -107,9 +110,8 @@ addBook.addEventListener("click", (e) => {
   const bookRead = document.querySelector("#read").checked;
 
   addBookToLibrary(bookTitle, bookAuthor, bookGenre, bookpages, bookRead);
-  const newBook = myLibrary[myLibrary.length - 1];
+  Library.bookLoader[myLibrary.length - 1];
 
-  bookLoader(newBook);
   bookForm.close();
 });
 
@@ -138,10 +140,6 @@ const dummy3 = new Book(
   false
 );
 
-const myLibrary = [
-  dummy1,
-  dummy2,
-  dummy3,
-];
+const myLibrary = [dummy1, dummy2, dummy3];
 
-libraryLoader();
+Library.libraryLoader();
