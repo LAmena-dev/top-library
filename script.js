@@ -27,6 +27,33 @@ Book.prototype.toggleRead = function () {
   this.read = !this.read;
 };
 
+const dummy1 = new Book(
+  crypto.randomUUID(),
+  "Deltora Quest",
+  "Emily Rodda",
+  "fantasy",
+  "203",
+  true
+);
+const dummy2 = new Book(
+  crypto.randomUUID(),
+  "Love in the Reaches of Space",
+  "Hal Barry",
+  "romance scifi",
+  "403",
+  true
+);
+const dummy3 = new Book(
+  crypto.randomUUID(),
+  "London Cases",
+  "W.S. Lockson",
+  "mystery",
+  "530",
+  false
+);
+
+const myLibrary = [dummy1, dummy2, dummy3];
+
 function addBookToLibrary(title, author, genre, pages, read) {
   const id = crypto.randomUUID();
   myLibrary.push(new Book(id, title, author, genre, pages, read));
@@ -101,45 +128,46 @@ const Library = (() => {
   return { bookLoader, libraryLoader };
 })();
 
-document.querySelector(".addBook").addEventListener("click", (e) => {
+const form = document.querySelector(".bookForm form");
+form.addEventListener("click", (e) => {
   e.preventDefault();
-  const bookTitle = document.querySelector("#title").value;
-  const bookAuthor = document.querySelector("#author").value;
+
+  const title = document.querySelector("#title");
+  const author = document.querySelector("#author");
+  const pages = document.querySelector("#pages");
+
+  if (title.validity.valueMissing) {
+    title.setCustomValidity("Enter the book's title");
+  } else {
+    title.setCustomValidity("");
+  }
+  if (author.validity.valueMissing) {
+    author.setCustomValidity("Enter the book's author");
+  } else {
+    author.setCustomValidity("");
+  }
+  if (pages.validity.rangeUnderflow) {
+    pages.setCustomValidity("Enter more than 0 pages");
+  } else {
+    pages.setCustomValidity("");
+  }
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  const bookTitle = title.value;
+  const bookAuthor = author.value;
   const bookGenre = document.querySelector("#genre").value;
-  const bookpages = document.querySelector("#pages").value;
+  const bookpages = parseInt(pages.value, 10);
   const bookRead = document.querySelector("#read").checked;
 
   addBookToLibrary(bookTitle, bookAuthor, bookGenre, bookpages, bookRead);
-  Library.bookLoader[myLibrary.length - 1];
+  Library.bookLoader(myLibrary[myLibrary.length - 1]);
 
   bookForm.close();
+  form.reset();
 });
-
-const dummy1 = new Book(
-  crypto.randomUUID(),
-  "Deltora Quest",
-  "Emily Rodda",
-  "fantasy",
-  "203",
-  true
-);
-const dummy2 = new Book(
-  crypto.randomUUID(),
-  "Love in the Reaches of Space",
-  "Hal Barry",
-  "romance scifi",
-  "403",
-  true
-);
-const dummy3 = new Book(
-  crypto.randomUUID(),
-  "London Cases",
-  "W.S. Lockson",
-  "mystery",
-  "530",
-  false
-);
-
-const myLibrary = [dummy1, dummy2, dummy3];
 
 Library.libraryLoader();
